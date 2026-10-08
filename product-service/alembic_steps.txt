@@ -1,0 +1,24 @@
+=> Install alembic
+pip install alembic
+
+=> Initialize alembic inside the app directory
+alembic init alembic
+
+=> Next add necessary settings in the alembic env file.
+Load env variables, models and set DATABASE URL
+
+Test alembic by running:
+-------
+alembic current
+
+Inspect generated migration by running:
+-----------
+alembic revision --autogenerate -m "create product service tables"
+
+Check the migration file inside the version folder and if everything is okay run:
+-------------
+alembic upgrade head
+
+If upgrade head succeeds, we'll then remove:
+--------
+Base.metadata.create_all(bind=engine)

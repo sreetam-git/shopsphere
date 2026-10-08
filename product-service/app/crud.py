@@ -1,7 +1,13 @@
 from sqlalchemy.orm import Session
 
-from .models import Category, Product
-from .schemas import CategoryCreate, ProductCreate, ProductUpdate
+from .models import Category, Product, Attribute, AttributeValue, ProductVariant
+from .schemas import (CategoryCreate, 
+                      ProductCreate, 
+                      ProductUpdate, 
+                      AttributeCreate, 
+                      AttributeValueCreate,
+                      ProductVariantCreate
+                      )
 
 def create_category(db: Session, category: CategoryCreate):
     db_category = Category(
@@ -112,3 +118,124 @@ def delete_product_by_id(db: Session, product_id: int):
     db.refresh(product)
 
     return product
+
+# add product attribute
+def create_product_attribute(db: Session, product_id: int, attribute_id: int):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return "product_not_found"
+
+    attribute = db.query(Attribute).filter(Attribute.id == attribute_id).first()
+    if not attribute:
+        return "attribute_not_found"
+
+    if attribute in product.attributes:
+        return "already_exists"
+
+    product.attributes.append(attribute)
+    db.commit()
+
+    return attribute
+
+# get all product attributes
+def get_product_attributes(db: Session, product_id: int):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return None
+
+    return product.attributes
+
+# attribute create
+def create_attribute(db: Session, attribute_data: AttributeCreate):
+    existing = db.query(Attribute).filter(Attribute.name == attribute_data.name).first()
+    if existing:
+        return None
+    
+    attr = Attribute(
+        name = attribute_data.name
+    )
+
+    db.add(attr)
+    db.commit()
+    db.refresh(attr)
+    return attr
+
+# get all attributes
+def fetch_attributes(db: Session):
+    return db.query(Attribute).all()
+
+# get attribute details
+def get_attribute_by_id(db: Session, attribute_id: int):
+    attr = db.query(Attribute).filter(Attribute.id == attribute_id).first()
+
+    if not attr:
+        return None
+
+    return attr
+
+# create attribute values
+def create_attribute_value(db: Session, attribute_id: int, value_data: AttributeValueCreate):
+    attribute = db.query(Attribute).filter(Attribute.id == attribute_id).first()
+    if not attribute:
+        return None
+
+    existing_value = (
+        db.query(AttributeValue)
+        .filter(
+            AttributeValue.attribute_id == attribute_id,
+            AttributeValue.value == value_data.value
+            )
+        .first()
+        )
+
+    if existing_value:
+        return "value_exists"
+
+    attr_value = AttributeValue(
+        attribute_id = attribute_id,
+        value = value_data.value
+    )
+
+    db.add(attr_value)
+    db.commit()
+    db.refresh(attr_value)
+
+    return attr_value
+
+
+def get_attribute_values_by_id(db: Session, attribute_id: int):
+    attribute = db.query(Attribute).filter(Attribute.id == attribute_id).first()
+    if not attribute:
+        return None
+
+    attr_value = (
+        db.query(AttributeValue)
+        .filter(
+            AttributeValue.attribute_id == attribute_id,
+            )
+        .all()
+        )
+
+    return attr_value
+
+# create product variant
+def create_variant(db: Session, product_id: int, variant_data: ProductVariantCreate):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        return "product_not_found"
+
+    exists = db.query(ProductVariant).filter(ProductVariant.sku == variant_data.sku).first()
+    if exists:
+        return "variant_exists"
+
+    variant = ProductVariant(
+        product_id = product_id,
+        sku = variant_data.sku,
+        price = variant_data.price,
+        stock = variant_data.stock
+    )
+
+    db.add(variant)
+    db.commit()
+    db.refresh(variant)
+    return variant

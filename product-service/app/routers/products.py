@@ -2,8 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..crud import create_product, get_products_list, get_product_by_id, update_product_by_id, delete_product_by_id
-from ..schemas import ProductCreate, ProductUpdate, ProductResponse
+from ..crud import (create_product, 
+                    get_products_list, 
+                    get_product_by_id, 
+                    update_product_by_id, 
+                    delete_product_by_id,
+                    create_product_attribute,
+                    get_product_attributes,
+                    create_variant
+                    )
+from ..schemas import (ProductCreate, 
+                       ProductUpdate, 
+                       ProductResponse, 
+                       ProductAttributeResponse,
+                       ProductVariantResponse,
+                       ProductVariantCreate
+                       )
 
 router = APIRouter(
     prefix="/products",
@@ -64,3 +78,52 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
         )
 
     return result
+
+@router.post("/{product_id}/attributes/{attribute_id}", response_model=ProductAttributeResponse)
+def add_product_attribute(product_id: int, attribute_id: int, db: Session = Depends(get_db)):
+    result = create_product_attribute(db, product_id, attribute_id)
+    if result == "product_not_found":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product Not Found"
+        )
+    elif result == "attribute_not_found":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attribute Not Found"
+        )
+    elif result == "already_exists":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Attribute already exists"
+        )
+
+    return result
+
+@router.get("/{product_id}/attributes", response_model=list[ProductAttributeResponse])
+def fetch_product_attributes(product_id: int, db: Session = Depends(get_db)):
+    result = get_product_attributes(db, product_id)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found."
+        )
+
+    return result
+
+@router.post("/{product_id}/variants", response_model=ProductVariantResponse)
+def add_variant(product_id: int, variant_data: ProductVariantCreate, db: Session = Depends(get_db)):
+    result = create_variant(db, product_id, variant_data)
+    if result == "product_not_found":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="product not found"
+        )
+    elif result == "variant_exists":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Variant already exists"
+        )
+
+    return result
+    

@@ -30,7 +30,6 @@ class ProductUpdate(BaseModel):
     category_id: int
 
 class ProductVariantCreate(BaseModel):
-    product_id: int
     sku: str
     price: Decimal = Field(gt=0)
     stock: int = Field(ge=0)
@@ -42,5 +41,30 @@ class ProductVariantResponse(BaseModel):
     price: Decimal
     stock: int = 0
     is_active: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AttributeCreate(BaseModel):
+    name: str
+
+class AttributeResponse(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AttributeValueCreate(BaseModel):
+    value: str
+
+class AttributeValueResponse(BaseModel):
+    id: int
+    attribute_id: int
+    value: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ProductAttributeResponse(BaseModel):
+    id: int
+    name: str
 
     model_config = ConfigDict(from_attributes=True)
