@@ -28,21 +28,58 @@ class Category(Base):
 
 
 # product <-> attribute association
-product_attributes = Table(
-    "product_attributes",
-    Base.metadata,
+# product_attributes = Table(
+#     "product_attributes",
+#     Base.metadata,
 
-    Column(
-        "product_id",
+#     Column(
+#         "product_id",
+#         ForeignKey("products.id"),
+#         primary_key=True
+#     ),
+#     Column(
+#         "attribute_id",
+#         ForeignKey("attributes.id"),
+#         primary_key=True
+#     ),
+#     Column(
+#         "is_variant_attribute",
+#         Boolean,
+#         default=False,
+#         nullable=True,
+#         server_default="0"
+#     )
+# )
+
+class ProductAttribute(Base):
+    __tablename__ = "product_attributes"
+
+    product_id = Column(
+        Integer,
         ForeignKey("products.id"),
         primary_key=True
-    ),
-    Column(
-        "attribute_id",
+    )
+    attribute_id = Column(
+        Integer,
         ForeignKey("attributes.id"),
         primary_key=True
     )
-)
+    is_variant_attribute = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0"
+    )
+
+    product = relationship(
+        "Product",
+        back_populates="attribute_assignments"
+    )
+    attribute = relationship(
+        "Attribute",
+        back_populates="product_assignments"
+    )
+
 
 # Variant Attribute values association
 variant_attribute_values = Table(
@@ -82,10 +119,10 @@ class Product(Base):
         back_populates="product"
     )
 
-    attributes = relationship(
-        "Attribute",
-        secondary=product_attributes,
-        back_populates="products"
+    attribute_assignments = relationship(
+        "ProductAttribute",
+        back_populates="product",
+        cascade="all, delete-orphan"
     )
 
 
@@ -132,11 +169,11 @@ class Attribute(Base):
         cascade="all, delete-orphan"
     )
 
-    products = relationship(
-        "Product",
-        secondary=product_attributes,
-        back_populates="attributes"
+    product_assignments = relationship(
+        "ProductAttribute",
+        back_populates="attribute"
     )
+
 
 # Attribute values
 class AttributeValue(Base):

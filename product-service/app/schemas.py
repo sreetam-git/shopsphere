@@ -63,8 +63,55 @@ class AttributeValueResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class ProductAttributeAssign(BaseModel):
+    attribute_id: int
+    is_variant_attribute: bool = False
+
 class ProductAttributeResponse(BaseModel):
     id: int
     name: str
+    is_variant_attribute: bool
+    
+    model_config = ConfigDict(from_attributes=True)
+
+class VariantOptionValueResponse(BaseModel):
+    id: int
+    value: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class VariantOptionResponse(BaseModel):
+    id: int
+    name: str
+    values: list[VariantOptionValueResponse]
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ProductVariantItemCreate(BaseModel):
+    sku: str = Field(min_length=1, max_length=100)
+    price: Decimal = Field(gt=0)
+    stock: int = Field(ge=0)
+    attribute_value_ids: list[int] = Field(default_factory=list)
+
+class ProductVariantBulkCreate(BaseModel):
+    variants: list[ProductVariantItemCreate] = Field(min_length=1)
+
+
+class VariantAttributeValueResponse(BaseModel):
+    id: int
+    attribute_id: int
+    value: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductVariantDetailResponse(BaseModel):
+    id: int
+    product_id: int
+    sku: str
+    price: Decimal
+    stock: int
+    is_active: bool
+    attribute_values: list[VariantAttributeValueResponse]
 
     model_config = ConfigDict(from_attributes=True)
