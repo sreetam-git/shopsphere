@@ -12,7 +12,9 @@ from ..crud import (create_product,
                     get_product_attributes,
                     fetch_product_variant_options,
                     create_bulk_variants,
-                    fetch_product_variants_by_id
+                    fetch_product_variants_by_id,
+                    update_product_variant,
+                    inactive_product_variant
                     )
 from ..schemas import (ProductCreate, 
                        ProductUpdate, 
@@ -22,7 +24,8 @@ from ..schemas import (ProductCreate,
                        ProductVariantResponse,
                        VariantOptionResponse,
                        ProductVariantBulkCreate,
-                       ProductVariantDetailResponse
+                       ProductVariantDetailResponse,
+                       ProductVariantUpdate
                        )
 
 router = APIRouter(
@@ -227,4 +230,22 @@ def get_product_variants(product_id: int, db: Session = Depends(get_db)):
         )
 
     return result
-    
+
+# Update product variant
+@router.patch("/{product_id}/variants/{variant_id}", response_model=ProductVariantDetailResponse)
+def update_product_variant_data(product_id: int, variant_id: int, data: ProductVariantUpdate, db: Session = Depends(get_db)):
+    result = update_product_variant(db, product_id, variant_id, data)
+
+    return result
+
+# Deactivate product variant
+@router.delete("/{product_id}/variants/{variant_id}", response_model=ProductVariantDetailResponse)
+def deactivate_product_variant(product_id: int, variant_id: int, db: Session = Depends(get_db)):
+    result = inactive_product_variant(db, product_id, variant_id)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Variant not found"
+        )
+
+    return result

@@ -125,6 +125,11 @@ class Product(Base):
         cascade="all, delete-orphan"
     )
 
+    images = relationship(
+        "ProductImage",
+        back_populates="product"
+    )
+
 
 class ProductVariant(Base):
     __tablename__ = "product_variants"
@@ -154,6 +159,11 @@ class ProductVariant(Base):
         "AttributeValue",
         secondary=variant_attribute_values,
         back_populates="variants"
+    )
+
+    images = relationship(
+        "ProductImage",
+        back_populates="variant"
     )
 
 # Attribute
@@ -200,4 +210,58 @@ class AttributeValue(Base):
             "value",
             name="uq_attribute_value"
         ),
+    )
+
+
+class ProductImage(Base):
+    __tablename__ = "product_images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
+
+    # NULL means this is a general product image.
+    # A value means the image belongs to a specific variant.
+    variant_id = Column(
+        Integer,
+        ForeignKey("product_variants.id"),
+        nullable=True,
+        index=True
+    )
+
+    storage_key = Column(
+        String(500),
+        nullable=False,
+        unique=True
+    )
+
+    alt_text = Column(String(255), nullable=True)
+
+    is_primary = Column(
+        Boolean,
+        default=False,
+        server_default="0",
+        nullable=False
+    )
+
+    display_order = Column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0"
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+
+    product = relationship(
+        "Product",
+        back_populates="images"
+    )
+
+    variant = relationship(
+        "ProductVariant",
+        back_populates="images"
     )

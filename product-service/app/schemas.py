@@ -115,3 +115,21 @@ class ProductVariantDetailResponse(BaseModel):
     attribute_values: list[VariantAttributeValueResponse]
 
     model_config = ConfigDict(from_attributes=True)
+
+class ProductVariantUpdate(BaseModel):
+    price: Decimal | None = Field(default=None, gt=0)
+    stock: int | None = Field(default=None, ge=0, alias="qty")
+    is_active: bool | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+class ProductImageResponse(BaseModel):
+    id: int
+    product_id: int
+    variant_id: int | None
+    storage_key: str
+    alt_text: str | None
+    is_primary: bool
+    display_order: int
+
+    model_config = ConfigDict(from_attributes=True)

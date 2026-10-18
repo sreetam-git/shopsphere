@@ -11,7 +11,8 @@ from .schemas import (CategoryCreate,
                       VariantOptionValueResponse,
                       VariantOptionResponse,
                       ProductVariantBulkCreate,
-                      ProductVariantDetailResponse
+                      ProductVariantDetailResponse,
+                      ProductVariantUpdate
                       )
 
 from sqlalchemy.exc import IntegrityError
@@ -446,3 +447,45 @@ def fetch_product_variants_by_id(db: Session, product_id: int):
     )
 
     return variants
+
+# Update product variant
+def update_product_variant(db: Session, product_id: int, variant_id: int, data: ProductVariantUpdate):
+    variant = (
+        db.query(ProductVariant)
+        .filter(
+            ProductVariant.id == variant_id,
+            ProductVariant.product_id == product_id
+        )
+        .first()
+    )
+    if not variant:
+        return "variant_not_found"
+
+    update_data = data.model_dump(exclude_unset=True)
+
+    if not update_data:
+        return "invalid_data"
+
+    for field, value in update_data.items():
+        setattr(variant, field, value)
+
+    db.commit()
+    db.refresh(variant)
+
+    return variant
+
+# Deactivate product variant
+def inactive_product_variant(db: Session, product_id: int, variant_id: int):
+    variant = db.query(ProductVariant).filter(
+        ProductVariant.product_id == product_id,
+        ProductVariant.id == variant_id
+    ).first()
+
+    if not variant:
+        return None
+
+    variant.is_active = False
+    db.commit()
+    db.refresh(variant)
+
+    return variant
