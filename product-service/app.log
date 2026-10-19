@@ -1,0 +1,103 @@
+2026-10-19 18:29:35,530 - sqlalchemy.engine.Engine - INFO - SELECT DATABASE()
+2026-10-19 18:29:35,531 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:29:35,533 - sqlalchemy.engine.Engine - INFO - SELECT @@sql_mode
+2026-10-19 18:29:35,533 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:29:35,534 - sqlalchemy.engine.Engine - INFO - SELECT @@lower_case_table_names
+2026-10-19 18:29:35,535 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:29:35,536 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:29:35,540 - sqlalchemy.engine.Engine - INFO - SELECT products.id AS products_id, products.name AS products_name, products.description AS products_description, products.category_id AS products_category_id, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:29:35,540 - sqlalchemy.engine.Engine - INFO - [generated in 0.00086s] {'id_1': 1, 'param_1': 1}
+2026-10-19 18:29:35,548 - sqlalchemy.engine.Engine - INFO - SELECT product_variants.id AS product_variants_id, product_variants.product_id AS product_variants_product_id, product_variants.sku AS product_variants_sku, product_variants.price AS product_variants_price, product_variants.stock AS product_variants_stock, product_variants.is_active AS product_variants_is_active, product_variants.created_at AS product_variants_created_at, product_variants.updated_at AS product_variants_updated_at 
+FROM product_variants 
+WHERE product_variants.id = %(id_1)s AND product_variants.product_id = %(product_id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:29:35,549 - sqlalchemy.engine.Engine - INFO - [generated in 0.00103s] {'id_1': 0, 'product_id_1': 1, 'param_1': 1}
+2026-10-19 18:29:35,554 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-10-19 18:29:50,731 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:29:50,731 - sqlalchemy.engine.Engine - INFO - SELECT products.id AS products_id, products.name AS products_name, products.description AS products_description, products.category_id AS products_category_id, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:29:50,732 - sqlalchemy.engine.Engine - INFO - [cached since 15.19s ago] {'id_1': 1, 'param_1': 1}
+2026-10-19 18:29:56,278 - sqlalchemy.engine.Engine - INFO - INSERT INTO product_images (product_id, variant_id, storage_key, alt_text, is_primary, display_order) VALUES (%(product_id)s, %(variant_id)s, %(storage_key)s, %(alt_text)s, %(is_primary)s, %(display_order)s)
+2026-10-19 18:29:56,279 - sqlalchemy.engine.Engine - INFO - [generated in 0.00091s] {'product_id': 1, 'variant_id': None, 'storage_key': 'products/1d2e69dd2e42945cf8d5bbb8323806414.jpg', 'alt_text': 'vivo v29 magenta', 'is_primary': 0, 'display_order': 0}
+2026-10-19 18:29:56,287 - sqlalchemy.engine.Engine - INFO - COMMIT
+2026-10-19 18:29:56,306 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:29:56,313 - sqlalchemy.engine.Engine - INFO - SELECT product_images.id, product_images.product_id, product_images.variant_id, product_images.storage_key, product_images.alt_text, product_images.is_primary, product_images.display_order, product_images.created_at 
+FROM product_images 
+WHERE product_images.id = %(pk_1)s
+2026-10-19 18:29:56,332 - sqlalchemy.engine.Engine - INFO - [generated in 0.01984s] {'pk_1': 5}
+2026-10-19 18:29:56,344 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-10-19 18:36:45,147 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:36:45,152 - sqlalchemy.engine.Engine - INFO - SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.variant_id AS product_images_variant_id, product_images.storage_key AS product_images_storage_key, product_images.alt_text AS product_images_alt_text, product_images.is_primary AS product_images_is_primary, product_images.display_order AS product_images_display_order, product_images.created_at AS product_images_created_at 
+FROM product_images 
+WHERE product_images.id = %(id_1)s AND product_images.product_id = %(product_id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:36:45,154 - sqlalchemy.engine.Engine - INFO - [generated in 0.00161s] {'id_1': 5, 'product_id_1': 1, 'param_1': 1}
+2026-10-19 18:36:45,158 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-10-19 18:38:04,372 - sqlalchemy.engine.Engine - INFO - SELECT DATABASE()
+2026-10-19 18:38:04,373 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:38:04,375 - sqlalchemy.engine.Engine - INFO - SELECT @@sql_mode
+2026-10-19 18:38:04,375 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:38:04,376 - sqlalchemy.engine.Engine - INFO - SELECT @@lower_case_table_names
+2026-10-19 18:38:04,376 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:38:04,378 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:38:04,384 - sqlalchemy.engine.Engine - INFO - SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.variant_id AS product_images_variant_id, product_images.storage_key AS product_images_storage_key, product_images.alt_text AS product_images_alt_text, product_images.is_primary AS product_images_is_primary, product_images.display_order AS product_images_display_order, product_images.created_at AS product_images_created_at 
+FROM product_images 
+WHERE product_images.id = %(id_1)s AND product_images.product_id = %(product_id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:38:04,385 - sqlalchemy.engine.Engine - INFO - [generated in 0.00044s] {'id_1': 5, 'product_id_1': 1, 'param_1': 1}
+2026-10-19 18:38:04,503 - sqlalchemy.engine.Engine - INFO - DELETE FROM product_images WHERE product_images.id = %(id)s
+2026-10-19 18:38:04,513 - sqlalchemy.engine.Engine - INFO - [generated in 0.01001s] {'id': 5}
+2026-10-19 18:38:04,537 - sqlalchemy.engine.Engine - INFO - COMMIT
+2026-10-19 18:49:51,779 - sqlalchemy.engine.Engine - INFO - SELECT DATABASE()
+2026-10-19 18:49:51,780 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:49:51,781 - sqlalchemy.engine.Engine - INFO - SELECT @@sql_mode
+2026-10-19 18:49:51,782 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:49:51,783 - sqlalchemy.engine.Engine - INFO - SELECT @@lower_case_table_names
+2026-10-19 18:49:51,783 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 18:49:51,785 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:49:51,791 - sqlalchemy.engine.Engine - INFO - SELECT products.id AS products_id, products.name AS products_name, products.description AS products_description, products.category_id AS products_category_id, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:49:51,792 - sqlalchemy.engine.Engine - INFO - [generated in 0.00074s] {'id_1': 1, 'param_1': 1}
+2026-10-19 18:49:56,845 - sqlalchemy.engine.Engine - INFO - INSERT INTO product_images (product_id, variant_id, storage_key, alt_text, is_primary, display_order) VALUES (%(product_id)s, %(variant_id)s, %(storage_key)s, %(alt_text)s, %(is_primary)s, %(display_order)s)
+2026-10-19 18:49:56,845 - sqlalchemy.engine.Engine - INFO - [generated in 0.00098s] {'product_id': 1, 'variant_id': None, 'storage_key': 'products/147529245a1c34a7298e5bb025c06ddfb.jpg', 'alt_text': 'string', 'is_primary': 0, 'display_order': 0}
+2026-10-19 18:49:56,849 - sqlalchemy.engine.Engine - INFO - COMMIT
+2026-10-19 18:49:56,861 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:49:56,867 - sqlalchemy.engine.Engine - INFO - SELECT product_images.id, product_images.product_id, product_images.variant_id, product_images.storage_key, product_images.alt_text, product_images.is_primary, product_images.display_order, product_images.created_at 
+FROM product_images 
+WHERE product_images.id = %(pk_1)s
+2026-10-19 18:49:56,876 - sqlalchemy.engine.Engine - INFO - [generated in 0.00963s] {'pk_1': 6}
+2026-10-19 18:49:56,901 - sqlalchemy.engine.Engine - INFO - ROLLBACK
+2026-10-19 18:50:10,838 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 18:50:10,840 - sqlalchemy.engine.Engine - INFO - SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.variant_id AS product_images_variant_id, product_images.storage_key AS product_images_storage_key, product_images.alt_text AS product_images_alt_text, product_images.is_primary AS product_images_is_primary, product_images.display_order AS product_images_display_order, product_images.created_at AS product_images_created_at 
+FROM product_images 
+WHERE product_images.id = %(id_1)s AND product_images.product_id = %(product_id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 18:50:10,841 - sqlalchemy.engine.Engine - INFO - [generated in 0.00075s] {'id_1': 6, 'product_id_1': 1, 'param_1': 1}
+2026-10-19 18:50:10,846 - sqlalchemy.engine.Engine - INFO - DELETE FROM product_images WHERE product_images.id = %(id)s
+2026-10-19 18:50:10,846 - sqlalchemy.engine.Engine - INFO - [generated in 0.00049s] {'id': 6}
+2026-10-19 18:50:10,848 - sqlalchemy.engine.Engine - INFO - COMMIT
+2026-10-19 18:50:12,611 - app.routers.images - INFO - Image deleted successfully: 6
+2026-10-19 19:25:31,183 - sqlalchemy.engine.Engine - INFO - SELECT DATABASE()
+2026-10-19 19:25:31,184 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 19:25:31,187 - sqlalchemy.engine.Engine - INFO - SELECT @@sql_mode
+2026-10-19 19:25:31,188 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 19:25:31,189 - sqlalchemy.engine.Engine - INFO - SELECT @@lower_case_table_names
+2026-10-19 19:25:31,190 - sqlalchemy.engine.Engine - INFO - [raw sql] {}
+2026-10-19 19:25:31,192 - sqlalchemy.engine.Engine - INFO - BEGIN (implicit)
+2026-10-19 19:25:31,202 - sqlalchemy.engine.Engine - INFO - SELECT products.id AS products_id, products.name AS products_name, products.description AS products_description, products.category_id AS products_category_id, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-10-19 19:25:31,202 - sqlalchemy.engine.Engine - INFO - [generated in 0.00191s] {'id_1': 1, 'param_1': 1}
+2026-10-19 19:25:31,210 - sqlalchemy.engine.Engine - INFO - SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.variant_id AS product_images_variant_id, product_images.storage_key AS product_images_storage_key, product_images.alt_text AS product_images_alt_text, product_images.is_primary AS product_images_is_primary, product_images.display_order AS product_images_display_order, product_images.created_at AS product_images_created_at 
+FROM product_images 
+WHERE product_images.product_id = %(product_id_1)s ORDER BY product_images.display_order, product_images.id
+2026-10-19 19:25:31,211 - sqlalchemy.engine.Engine - INFO - [generated in 0.00099s] {'product_id_1': 1}
+2026-10-19 19:25:31,229 - sqlalchemy.engine.Engine - INFO - ROLLBACK

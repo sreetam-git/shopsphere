@@ -8,7 +8,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..database import get_db
 from ..models import Product, ProductVariant, ProductImage
 from ..schemas import ProductImageResponse
-from ..storage import upload_file_to_s3, delete_file_from_s3
+from ..storage import upload_file_to_s3, delete_file_from_s3, generate_presigned_url
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/products",
@@ -21,6 +23,18 @@ ALLOWED_TYPES = {
     "image/webp": ".webp",
 }
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+def serialize_image(image: ProductImage) -> ProductImageResponse:
+    return ProductImageResponse(
+        id=image.id,
+        product_id=image.product_id,
+        variant_id=image.variant_id,
+        alt_text=image.alt_text,
+        is_primary=image.is_primary,
+        storage_key=image.storage_key,
+        display_order=image.display_order,
+        image_url=generate_presigned_url(image.storage_key)
+    )
 
 @router.post("/{product_id}/images", response_model=ProductImageResponse, status_code=201)
 async def upload_product_image(
@@ -138,4 +152,145 @@ async def upload_product_image(
             "Failed to save image metadata"
         )
 
-    return image_record
+    return serialize_image(image_record)
+
+@router.get("/{product_id}/images", response_model=list[ProductImageResponse])
+def get_product_images(product_id: int, variant_id: int | None = None, db: Session = Depends(get_db)):
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(
+            404,
+            "Product Not Found"
+        )
+
+    query = db.query(ProductImage).filter(
+        ProductImage.product_id == product_id
+    )
+
+    # check for variant
+    if variant_id is not None:
+        print("***************************\n")
+        print(f"variant id: {variant_id}")
+        variant = db.query(ProductVariant).filter(
+            ProductVariant.product_id == product_id,
+            ProductVariant.id == variant_id
+        ).first()
+
+        if not variant:
+            raise HTTPException(
+                404,
+                "Variant Not Found"
+            )
+
+        query = query.filter(ProductImage.variant_id == variant_id)
+
+    images = query.order_by(
+        ProductImage.display_order,
+        ProductImage.id
+    ).all()
+
+    return [serialize_image(image) for image in images]
+
+@router.patch("/{product_id}/images/{image_id}/primary", response_model=ProductImageResponse)
+def set_primary_image(product_id: int, image_id: int, db: Session = Depends(get_db)):
+    image = db.query(ProductImage).filter(
+        ProductImage.id == image_id,
+        ProductImage.product_id == product_id
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            404,
+            "Image Not Found"
+        )
+
+    db.query(ProductImage).filter(
+        ProductImage.product_id == product_id,
+        ProductImage.variant_id == image.variant_id,
+        ProductImage.is_primary.is_(True)
+    ).update(
+        {
+            ProductImage.is_primary: False
+        },
+        synchronize_session=False
+    )
+
+    # update the selected image status
+    image.is_primary = True
+
+    try:
+        db.commit()
+        db.refresh(image)
+    except Exception:
+        db.rollback()
+        raise HTTPException(500, "Failed to update primary image.")
+
+    return serialize_image(image)
+
+@router.delete("/{product_id}/images/{image_id}")
+def delete_product_image(product_id: int, image_id: int, db: Session = Depends(get_db)):
+    # find the image belonging to the product
+    image = db.query(ProductImage).filter(
+        ProductImage.id == image_id,
+        ProductImage.product_id == product_id
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            404,
+            "Image not found."
+        )
+
+    object_key = image.storage_key
+    variant_id = image.variant_id
+    was_primary = image.is_primary
+
+    try:
+        # check for primary
+        if was_primary:
+            another_image = db.query(ProductImage).filter(
+                ProductImage.variant_id == variant_id,
+                ProductImage.product_id == product_id,
+                ProductImage.is_primary.is_(False)
+            ).order_by(ProductImage.display_order).first()
+
+            if another_image:
+                another_image.is_primary = True
+
+        # delete the image
+        db.delete(image)
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        logger.info("Failed to delete image metadata: image_id=%s",
+            image_id,)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete image metadata.",
+        )
+
+    # Delete the actual image file from s3
+    try:
+        delete_file_from_s3(object_key)
+    except Exception:
+        logger.info(
+            "S3 cleanup failed for object key: %s",
+            object_key,
+        )
+
+        return {
+            "message": (
+                "Image metadata was deleted, but S3 cleanup failed."
+                "Manual cleanup is required."
+            ),
+            "image_id": image_id,
+            "storage_cleanup": "failed"
+        }
+
+    logger.info(f"Image deleted successfully: {image_id}")
+    return {
+        "message": "Image deleted successfully.",
+        "image_id": image_id,
+        "storage_cleanup": "completed",
+    }

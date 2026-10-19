@@ -131,5 +131,6 @@ class ProductImageResponse(BaseModel):
     alt_text: str | None
     is_primary: bool
     display_order: int
+    image_url: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

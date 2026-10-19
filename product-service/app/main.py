@@ -2,6 +2,14 @@ from fastapi import FastAPI
 from .database import Base, engine
 from . import models
 from .routers import categories, products, attributes, images
+import logging
+
+logging.basicConfig(
+    filename="app.log",
+    filemode="a",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
 
 # Base.metadata.create_all(bind=engine)
 

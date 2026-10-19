@@ -30,3 +30,14 @@ def delete_file_from_s3(object_key: str):
         Bucket = S3_BUCKET_NAME,
         Key = object_key
     )
+
+def generate_presigned_url(object_key: str, expiration_seconds: int = 3600) -> str:
+    return s3_client.generate_presigned_url(
+        ClientMethod = "get_object",
+        Params = {
+            "Bucket": S3_BUCKET_NAME,
+            "Key": object_key
+        },
+        ExpiresIn = expiration_seconds
+    )
+    
