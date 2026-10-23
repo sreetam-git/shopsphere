@@ -28,13 +28,16 @@ from ..schemas import (ProductCreate,
                        ProductVariantUpdate
                        )
 
+from ..auth import get_current_admin
+
 router = APIRouter(
     prefix="/products",
     tags=["Products"]
 )
 
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-def add_product(product_data: ProductCreate, db: Session = Depends(get_db)):
+def add_product(product_data: ProductCreate, db: Session = Depends(get_db),
+                 current_user: dict = Depends(get_current_admin)):
     result = create_product(db, product_data)
     if not result:
         raise HTTPException(
@@ -61,7 +64,8 @@ def get_product_details(product_id: int, db: Session = Depends(get_db)):
     return product
 
 @router.put('/{product_id}', response_model=ProductResponse)
-def update_product(product_id: int, product_data: ProductUpdate, db: Session = Depends(get_db)):
+def update_product(product_id: int, product_data: ProductUpdate, db: Session = Depends(get_db),
+                   current_user: dict = Depends(get_current_admin)):
     product = update_product_by_id(db, product_data, product_id)
     if not product:
         raise HTTPException(
@@ -78,7 +82,7 @@ def update_product(product_id: int, product_data: ProductUpdate, db: Session = D
     return product
 
 @router.delete("/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK)
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(product_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_admin)):
     result = delete_product_by_id(db, product_id)
     if not result:
         raise HTTPException(
@@ -90,7 +94,9 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
 
 # assign attributes to the product
 @router.post("/{product_id}/attributes", response_model=ProductAttributeResponse)
-def add_product_attribute(product_id: int, attribute_data: ProductAttributeAssign, db: Session = Depends(get_db)):
+def add_product_attribute(product_id: int, attribute_data: ProductAttributeAssign, 
+                          db: Session = Depends(get_db), 
+                          current_user: dict = Depends(get_current_admin)):
     result = create_product_attribute(db, product_id, attribute_data)
     if result == "product_not_found":
         raise HTTPException(
@@ -124,7 +130,9 @@ def fetch_product_attributes(product_id: int, db: Session = Depends(get_db)):
 
 # Update the assigned attribute
 @router.put("/{product_id}/attributes", response_model=ProductAttributeResponse)
-def update_product_attribute(product_id: int, attribute_data: ProductAttributeAssign, db: Session = Depends(get_db)):
+def update_product_attribute(product_id: int, attribute_data: ProductAttributeAssign, 
+                             db: Session = Depends(get_db),
+                             current_user: dict = Depends(get_current_admin)):
     result = update_product_attribute_byid(db, product_id, attribute_data)
     if result == "product_not_found":
         raise HTTPException(
@@ -163,7 +171,8 @@ def get_variant_options(product_id: int, db: Session = Depends(get_db)):
 
 @router.post("/{product_id}/variants/bulk", response_model=list[ProductVariantResponse], status_code=status.HTTP_201_CREATED)
 def create_product_variants_bulk(product_id: int, variant_data: ProductVariantBulkCreate, 
-                                 db: Session = Depends(get_db)):
+                                 db: Session = Depends(get_db),
+                                 current_user: dict = Depends(get_current_admin)):
     result = create_bulk_variants(db, product_id, variant_data)
 
     if not result:
@@ -231,16 +240,19 @@ def get_product_variants(product_id: int, db: Session = Depends(get_db)):
 
     return result
 
-# Update product variant
+# Update product variantx
 @router.patch("/{product_id}/variants/{variant_id}", response_model=ProductVariantDetailResponse)
-def update_product_variant_data(product_id: int, variant_id: int, data: ProductVariantUpdate, db: Session = Depends(get_db)):
+def update_product_variant_data(product_id: int, variant_id: int, 
+                                data: ProductVariantUpdate, db: Session = Depends(get_db),
+                                current_user: dict = Depends(get_current_admin)):
     result = update_product_variant(db, product_id, variant_id, data)
 
     return result
 
 # Deactivate product variant
 @router.delete("/{product_id}/variants/{variant_id}", response_model=ProductVariantDetailResponse)
-def deactivate_product_variant(product_id: int, variant_id: int, db: Session = Depends(get_db)):
+def deactivate_product_variant(product_id: int, variant_id: int, db: Session = Depends(get_db),
+                               current_user: dict = Depends(get_current_admin)):
     result = inactive_product_variant(db, product_id, variant_id)
     if not result:
         raise HTTPException(

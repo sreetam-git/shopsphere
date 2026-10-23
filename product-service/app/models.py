@@ -26,31 +26,6 @@ class Category(Base):
         back_populates="category"
     )
 
-
-# product <-> attribute association
-# product_attributes = Table(
-#     "product_attributes",
-#     Base.metadata,
-
-#     Column(
-#         "product_id",
-#         ForeignKey("products.id"),
-#         primary_key=True
-#     ),
-#     Column(
-#         "attribute_id",
-#         ForeignKey("attributes.id"),
-#         primary_key=True
-#     ),
-#     Column(
-#         "is_variant_attribute",
-#         Boolean,
-#         default=False,
-#         nullable=True,
-#         server_default="0"
-#     )
-# )
-
 class ProductAttribute(Base):
     __tablename__ = "product_attributes"
 

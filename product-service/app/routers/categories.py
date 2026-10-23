@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..schemas import CategoryCreate, CategoryResponse
 from ..crud import create_category, fetch_categories, get_category_by_id, update_category_by_id, delete_category_by_id
+from ..auth import get_current_admin
 
 router = APIRouter(
     prefix="/categories",
@@ -11,7 +12,7 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=CategoryResponse)
-def add_category(category: CategoryCreate, db: Session = Depends(get_db)):
+def add_category(category: CategoryCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_admin)):
     return create_category(db=db, category=category)
 
 @router.get("/", response_model=list[CategoryResponse], status_code=status.HTTP_200_OK)
@@ -31,7 +32,8 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
     return result
 
 @router.put("/{category_id}", response_model=CategoryResponse)
-def update_category(category_id: int, category_data: CategoryCreate, db: Session = Depends(get_db)):
+def update_category(category_id: int, category_data: CategoryCreate, db: Session = Depends(get_db)
+                    , current_user: dict = Depends(get_current_admin)):
     result = update_category_by_id(db, category_id, category_data)
     if not result:
         raise HTTPException(
@@ -42,7 +44,8 @@ def update_category(category_id: int, category_data: CategoryCreate, db: Session
     return result
 
 @router.delete("/{category_id}")
-def delete_category(category_id: int, db: Session = Depends(get_db)):
+def delete_category(category_id: int, db: Session = Depends(get_db), 
+                    current_user: dict = Depends(get_current_admin)):
     result = delete_category_by_id(db, category_id)
     if not result:
         raise HTTPException(

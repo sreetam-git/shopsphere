@@ -12,6 +12,8 @@ from ..crud import (
     create_attribute_value, 
     get_attribute_values_by_id)
 
+from ..auth import get_current_admin
+
 from sqlalchemy.orm import Session
 
 router = APIRouter(
@@ -20,7 +22,9 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=AttributeResponse)
-def add_attribute(attribute_data: AttributeCreate, db: Session = Depends(get_db)):
+def add_attribute(attribute_data: AttributeCreate, 
+                  db: Session = Depends(get_db),
+                  current_user: dict = Depends(get_current_admin)):
     result = create_attribute(db, attribute_data)
     if not result:
         raise HTTPException(
@@ -46,7 +50,8 @@ def get_attribute_details(attribute_id: int, db: Session = Depends(get_db)):
     return result
 
 @router.post("/{attribute_id}/values", response_model=AttributeValueResponse)
-def add_attribute_value(attribute_id: int, values_data: AttributeValueCreate, db: Session = Depends(get_db)):
+def add_attribute_value(attribute_id: int, values_data: AttributeValueCreate, 
+                        db: Session = Depends(get_db), current_user: dict = Depends(get_current_admin)):
     result = create_attribute_value(db=db, attribute_id=attribute_id, value_data=values_data)
 
     if not result:

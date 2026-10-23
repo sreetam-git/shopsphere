@@ -9,6 +9,7 @@ from ..database import get_db
 from ..models import Product, ProductVariant, ProductImage
 from ..schemas import ProductImageResponse
 from ..storage import upload_file_to_s3, delete_file_from_s3, generate_presigned_url
+from ..auth import get_current_admin
 import logging
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,8 @@ async def upload_product_image(
     variant_id: int | None = Form(default=None),
     alt_text: str | None = Form(default=None),
     display_order: int = Form(default=0),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_admin)
 ):
     product = db.query(Product).filter(Product.id == product_id).first()
 
@@ -145,7 +147,10 @@ async def upload_product_image(
         try:
             delete_file_from_s3(object_key)
         except Exception:
-            pass
+            logger.exception(
+                "Failed to clean up S3 object after metadata save failed: key=%s",
+                object_key,
+            )
 
         raise HTTPException(
             500,
@@ -192,7 +197,8 @@ def get_product_images(product_id: int, variant_id: int | None = None, db: Sessi
     return [serialize_image(image) for image in images]
 
 @router.patch("/{product_id}/images/{image_id}/primary", response_model=ProductImageResponse)
-def set_primary_image(product_id: int, image_id: int, db: Session = Depends(get_db)):
+def set_primary_image(product_id: int, image_id: int, db: Session = Depends(get_db),
+                      current_user: dict = Depends(get_current_admin)):
     image = db.query(ProductImage).filter(
         ProductImage.id == image_id,
         ProductImage.product_id == product_id
@@ -204,23 +210,24 @@ def set_primary_image(product_id: int, image_id: int, db: Session = Depends(get_
             "Image Not Found"
         )
 
-    db.query(ProductImage).filter(
-        ProductImage.product_id == product_id,
-        ProductImage.variant_id == image.variant_id,
-        ProductImage.is_primary.is_(True)
-    ).update(
-        {
-            ProductImage.is_primary: False
-        },
-        synchronize_session=False
-    )
-
-    # update the selected image status
-    image.is_primary = True
-
     try:
+        db.query(ProductImage).filter(
+                ProductImage.product_id == product_id,
+                ProductImage.variant_id == image.variant_id,
+                ProductImage.is_primary.is_(True)
+            ).update(
+                {
+                    ProductImage.is_primary: False
+                },
+                synchronize_session=False
+            )
+        
+            # update the selected image status
+        image.is_primary = True
+        
         db.commit()
         db.refresh(image)
+
     except Exception:
         db.rollback()
         raise HTTPException(500, "Failed to update primary image.")
@@ -228,7 +235,8 @@ def set_primary_image(product_id: int, image_id: int, db: Session = Depends(get_
     return serialize_image(image)
 
 @router.delete("/{product_id}/images/{image_id}")
-def delete_product_image(product_id: int, image_id: int, db: Session = Depends(get_db)):
+def delete_product_image(product_id: int, image_id: int, db: Session = Depends(get_db),
+                         current_user: dict = Depends(get_current_admin)):
     # find the image belonging to the product
     image = db.query(ProductImage).filter(
         ProductImage.id == image_id,
@@ -263,8 +271,8 @@ def delete_product_image(product_id: int, image_id: int, db: Session = Depends(g
 
     except Exception:
         db.rollback()
-        logger.info("Failed to delete image metadata: image_id=%s",
-            image_id,)
+        logger.exception("Failed to delete image metadata: image_id=%s", image_id,)
+
         raise HTTPException(
             status_code=500,
             detail="Failed to delete image metadata.",

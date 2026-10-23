@@ -1,6 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from .database import Base, engine
-from . import models
 from .routers import categories, products, attributes, images
 import logging
 
